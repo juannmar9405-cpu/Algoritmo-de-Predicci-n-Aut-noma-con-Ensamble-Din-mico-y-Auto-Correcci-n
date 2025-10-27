@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Arquitectura ML Híbrida</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+          position: relative;
+/* ... existing code ... -->
+          }
+        }
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border-bottom: 2px solid transparent;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #4B5563; 
+        }
+        .nav-btn.active {
+            color: #1D4ED8; 
+            background-color: #EFF6FF;
+            color: #3730A3; 
+            background-color: #E0E7FF;
+            border-bottom-color: #2563EB;
+            border-bottom-color: #4F46E5;
+            font-weight: 600;
+        }
+        .nav-btn:hover:not(.active) {
+            color: #2563EB; 
+            background-color: #F9FAFB;
+            color: #4F46E5; 
+            background-color: #EEF2FF;
+        }
+        .content-section {
+            animation: fadeIn 0.5s ease-in-out;
+/* ... existing code ... -->
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .diagram-box {
+            background-color: white;
+            border: 1px solid #E5E7EB;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+            text-align: center;
+            transition: all 0.3s ease-in-out;
+            border-left-width: 4px;
+        }
+        .diagram-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+            border: 1px solid #E5E7EB;
+            transition: all 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .diagram-arrow {
+            font-size: 2rem;
+/* ... existing code ... -->
+            align-self: center;
+        }
+    </style>
+    <!-- Chosen Palette: Modern Tech (Light Gray, Deep Blue, Semantic Accents) -->
+    <!-- Application Structure Plan: Se utiliza una estructura de SPA (Single-Page Application) con una navegación fija en el encabezado (Arquitectura, Entrenamiento, Inferencia, Retroalimentación, Consideraciones). Esta no es una página de desplazamiento largo; al hacer clic en un enlace de navegación, se muestra dinámicamente la sección de contenido relevante y se ocultan las demás usando JavaScript. ¿Por qué? El informe describe un proceso complejo de varias etapas. Un enfoque basado en navegación/pestañas es superior al desplazamiento lineal porque permite al usuario segmentar lógicamente el proceso (ej. "¿Cómo se construye?" vs. "¿Cómo predice?") y saltar instantáneamente a la sección relevante sin perder contexto, mejorando la exploración y la comprensión. -->
+    <!-- Visualization & Content Choices: 
+        1. Report Info (Arquitectura): Diagrama de 4 redes. Goal: Mostrar relaciones y flujo. Viz/Presentation: Diagrama personalizado con HTML/Tailwind (flexbox/grid) y flechas Unicode (→, ↓). Cada red (N1-N4) es una tarjeta <div> estilizada. Interaction: Hover sobre las tarjetas (no implementado para simplicidad, pero planeado). Justification: Hace tangible la arquitectura abstracta sin usar SVG/Mermaid. Library: HTML/Tailwind.
+        2. Report Info (Fase 1-4, Entrenamiento): Proceso K-Fold y pasos secuenciales. Goal: Mostrar secuencia paso a paso. Viz/Presentation: Sub-pestañas (Fase 1, 2, 3, 4). El proceso K-Fold es un simple diagrama de cuadrícula HTML. Interaction: Clic en las pestañas para cambiar de fase. Justification: Descompone la parte más compleja (entrenamiento) en pasos manejables. Library: HTML/Tailwind/JS.
+        3. Report Info (Fase 5, Inferencia): Flujo de predicción de 4 pasos. Goal: Mostrar flujo de datos para una predicción. Viz/Presentation: Lista vertical numerada de "pasos" estilizados. Justification: Una "guía" lineal clara para el pipeline de predicción. Library: HTML/Tailwind.
+        4. Report Info (Fase 6, Retroalimentación): 3 opciones (A, B, C). Goal: Comparar estrategias de feedback. Viz/Presentation: Diseño de cuadrícula de 3 columnas (Flexbox/Grid), cada opción como una tarjeta. Justification: Fácil comparación lado a lado. Library: HTML/Tailwind.
+        5. Report Info (Consideraciones - Costo Computacional): El informe no tiene datos cuantitativos. Goal: Ilustrar el concepto de alto costo. Viz/Presentation: Gráfico de barras simple (Chart.js) titulado "Costo Computacional Relativo (Ejemplo)". Data (Hipotética): N2 (K-Fold): 100, N3 (K-Fold): 120, N1: 10, N4: 50. Interaction: Hover para tooltips. Justification: Cumple con el requisito técnico de usar Chart.js al visualizar un concepto (costo) mencionado directamente en el informe. Library: Chart.js (Canvas).
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans leading-relaxed">
+<body class="bg-indigo-50 text-gray-800 font-sans leading-relaxed">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-200">
+        <div class="container mx-auto flex flex-col md:flex-row items-center justify-between p-4">
+            <h1 class="text-2xl font-bold text-gray-800 mb-2 md:mb-0">
+                <span class="text-blue-600">Arquitectura</span> ML Híbrida
+                <span class="text-indigo-600">Arquitectura</span> ML Híbrida
+            </h1>
+            <nav class="flex flex-wrap justify-center">
+            <nav class="flex flex-wrap justify-center space-x-1 md:space-x-2">
+                <button class="nav-btn active" data-target="arquitectura">Arquitectura</button>
+                <button class="nav-btn" data-target="entrenamiento">Entrenamiento</button>
+                <button class="nav-btn" data-target="inferencia">Inferencia</button>
+                <button class="nav-btn" data-target="retroalimentacion">Retroalimentación</button>
+                <button class="nav-btn" data-target="consideraciones">Consideraciones</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <section id="arquitectura" class="content-section">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">Resumen de la Arquitectura Híbrida</h2>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">🏗️ Resumen de la Arquitectura Híbrida</h2>
+            <p class="text-lg text-gray-600 mb-8 max-w-3xl mx-auto text-center">
+                Este modelo es un ensamblaje avanzado que combina cuatro redes neuronales para maximizar la precisión. Utiliza apilamiento (stacking) para combinar predicciones y corrección de errores para refinar el resultado. Explore el diagrama interactivo a continuación para entender el flujo de datos.
+            </p>
+            
+            <div class="flex flex-col items-center space-y-4">
+                <div class="diagram-box w-full md:w-1/2 border-l-blue-500">
+                    <h3 class="text-xl font-semibold mb-2 text-blue-600">Entrada de Datos (`X`)</h3>
+                <div class="diagram-box w-full md:w-1/2 border-l-indigo-500">
+                    <h3 class="text-xl font-semibold mb-2 text-indigo-600">Entrada de Datos (`X`)</h3>
+                    <p class="text-gray-600">Conjunto de características originales</p>
+                </div>
+                
+                <div class="diagram-arrow">↓</div>
+                
+                <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4 w-full max-w-4xl">
+                    <div class="diagram-box flex-1 border-l-green-500">
+                        <h3 class="text-xl font-semibold mb-2 text-green-600">Red Base (N2)</h3>
+                        <p class="text-gray-600">Arquitectura A (ej. MLP)</p>
+                        <p class="font-mono text-sm mt-2">Predicción: `P2`</p>
+                    </div>
+                    <div class="diagram-box flex-1 border-l-green-500">
+                        <h3 class="text-xl font-semibold mb-2 text-green-600">Red Base (N3)</h3>
+                        <p class="text-gray-600">Arquitectura B (ej. CNN)</p>
+                        <p class="font-mono text-sm mt-2">Predicción: `P3`</p>
+                    </div>
+                </div>
+
+                <div class="flex justify-center items-center">
+                    <div class="transform -rotate-45 diagram-arrow">↳</div>
+                    <div class="diagram-arrow">↓</div>
+                    <div class="transform rotate-45 diagram-arrow">↲</div>
+                </div>
+
+                <div class="diagram-box w-full md:w-1/2 border-l-purple-500">
+                    <h3 class="text-xl font-semibold mb-2 text-purple-600">Red de Apilamiento (N1)</h3>
+                    <p class="text-gray-600">Entrada: (`P2`, `P3`). Aprende a combinar predicciones.</p>
+                    <p class="font-mono text-sm mt-2">Predicción: `P1`</p>
+                </div>
+
+                <div class="diagram-arrow">↓</div>
+
+                <div class="flex flex-col md:flex-row justify-center items-start w-full max-w-5xl">
+                    <div class="flex-1 flex justify-center items-center h-full">
+                        <div class="diagram-arrow mr-4">↳</div>
+                    </div>
+                    <div class="diagram-box flex-2 w-full md:w-1/2 relative border-l-red-500">
+                        <h3 class="text-xl font-semibold mb-2 text-red-600">Red de Corrección (N4)</h3>
+                        <p class="text-gray-600">Entrada: (`X`, `P1`, `P2`, `P3`). Predice el error de N1.</p>
+                        <p class="font-mono text-sm mt-2">Predicción: `P_corrección`</p>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-around h-full items-center">
+                        <div class="diagram-arrow ml-4 hidden md:block">↲</div>
+                        <div class="diagram-arrow ml-4 mt-4 text-gray-300 transform md:rotate-90">|</div>
+                        <div class="diagram-arrow ml-4 text-gray-300">↓</div>
+                    </div>
+                </div>
+
+                <div class="diagram-arrow">↓</div>
+
+                <div class="diagram-box w-full md:w-1/2 bg-gray-800 text-white border-l-yellow-400">
+                    <h3 class="text-2xl font-bold mb-2 text-yellow-300">Predicción Final</h3>
+                    <p class="text-gray-200">El resultado refinado del sistema.</p>
+                    <p class="font-mono text-lg mt-2 bg-black bg-opacity-20 px-4 py-2 rounded">P_final = P1 + P_corrección</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="entrenamiento" class="content-section hidden">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">Fases de Entrenamiento</h2>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">⚙️ Fases de Entrenamiento</h2>
+            <p class="text-lg text-gray-600 mb-8 max-w-3xl mx-auto text-center">
+                El entrenamiento es un proceso secuencial y meticuloso. La clave es la partición de datos K-Fold para entrenar la red N1 (stacking) sin fuga de datos, seguido del entrenamiento del corrector de errores N4.
+            </p>
+
+            <div class="mb-8 border-b border-gray-300 flex justify-center">
+                <button class="sub-nav-btn nav-btn active" data-target="fase1">Fase 1: Datos</button>
+                <button class="sub-nav-btn nav-btn" data-target="fase2">Fase 2: Redes Base</button>
+                <button class="sub-nav-btn nav-btn" data-target="fase3">Fase 3: Apilamiento</button>
+                <button class="sub-nav-btn nav-btn" data-target="fase4">Fase 4: Corrección</button>
+            </div>
+
+            <div id="fase1" class="sub-content-section">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Fase 1: Definición y Preparación de Datos</h3>
+                <p class="mb-4">El éxito de este modelo depende críticamente de una correcta partición de los datos para evitar el *data leakage* (fuga de datos) en el entrenamiento de N1.</p>
+                <ul class="list-disc list-inside space-y-2 mb-6 bg-white p-6 rounded-lg shadow-sm border">
+                    <li><strong class="font-semibold">Conjunto de Test (Hold-out):</strong> `(X_test, y_test)` (15-20%). Se reserva para la evaluación final.</li>
+                    <li><strong class="font-semibold">Conjunto de Entrenamiento Completo:</strong> `(X_train_full, y_train_full)` (80-85%).</li>
+                </ul>
+                <h4 class="text-xl font-semibold text-gray-700 mb-3">Partición para Stacking (K-Fold)</h4>
+                <p class="mb-4">Para entrenar N1, usamos validación cruzada (ej. K=5) sobre `(X_train_full)`. Esto genera predicciones "fuera de muestra" (out-of-fold) que se convierten en los datos de entrenamiento para N1.</p>
+                <div class="grid grid-cols-5 gap-2 text-center text-sm">
+                    <div class="p-4 bg-blue-100 border border-blue-300 rounded-lg">Fold 1</div>
+                    <div class="p-4 bg-blue-100 border border-blue-300 rounded-lg">Fold 2</div>
+                    <div class="p-4 bg-blue-100 border border-blue-300 rounded-lg">Fold 3</div>
+                    <div class="p-4 bg-blue-100 border border-blue-300 rounded-lg">Fold 4</div>
+                    <div class="p-4 bg-blue-100 border border-blue-300 rounded-lg">Fold 5</div>
+                    <div class="p-4 bg-indigo-100 border border-indigo-300 rounded-lg">Fold 1</div>
+                    <div class="p-4 bg-indigo-100 border border-indigo-300 rounded-lg">Fold 2</div>
+                    <div class="p-4 bg-indigo-100 border border-indigo-300 rounded-lg">Fold 3</div>
+                    <div class="p-4 bg-indigo-100 border border-indigo-300 rounded-lg">Fold 4</div>
+                    <div class="p-4 bg-indigo-100 border border-indigo-300 rounded-lg">Fold 5</div>
+                </div>
+                <p class="text-sm text-gray-600 mt-2 text-center">Ej. Entrenar en F1-F4, predecir en F5. Luego entrenar en F1-F3+F5, predecir en F4...</p>
+            </div>
+
+            <div id="fase2" class="sub-content-section hidden">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Fase 2: Entrenamiento de Redes Base (N2 y N3)</h3>
+                <p class="mb-4">Las redes base deben tener arquitecturas diferentes para que sus errores sean decorrelacionados (es decir, que se equivoquen en cosas distintas).</p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="card">
+                        <h4 class="text-xl font-semibold text-green-700 mb-3">1. Entrenamiento K-Fold</h4>
+                        <p>Se entrena N2 y N3 *K veces* (una por cada fold) sobre las particiones de `(X_train_full)`. Se almacenan los K modelos de cada red.</p>
+                    </div>
+                    <div class="card">
+                        <h4 class="text-xl font-semibold text-green-700 mb-3">2. Generación de "Meta-Datos"</h4>
+                        <p>Se usan los modelos de cada fold para generar las predicciones "out-of-fold" (`P2_oof`, `P3_oof`).</p>
+                        <p class="font-mono text-sm mt-2 bg-gray-100 p-2 rounded">X_meta_train = [P2_oof, P3_oof]</p>
+                        <p class="font-mono text-sm mt-2 bg-gray-100 p-2 rounded">y_meta_train = y_train_full</p>
+                    </div>
+                    <div class="card md:col-span-2">
+                        <h4 class="text-xl font-semibold text-green-700 mb-3">3. Entrenamiento Final</h4>
+                        <p>Se vuelven a entrenar N2 y N3 una última vez, pero ahora usando *todo* el conjunto `(X_train_full, y_train_full)`. Estos modelos finales se usarán para la inferencia.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="fase3" class="sub-content-section hidden">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Fase 3: Entrenamiento de la Red de Apilamiento (N1)</h3>
+                <p class="mb-4">N1, el "meta-modelo", no ve los datos originales. Su único trabajo es aprender la combinación óptima de las predicciones de N2 y N3. Generalmente, N1 puede ser un modelo más simple (ej. una red MLP pequeña).</p>
+                <div class="card">
+                    <h4 class="text-xl font-semibold text-purple-700 mb-3">Entrenamiento de N1</h4>
+                    <p>Se entrena N1 usando los "meta-datos" generados en la Fase 2:</p>
+                    <p class="font-mono text-sm mt-2 bg-gray-100 p-2 rounded"><strong>Entrada:</strong> `X_meta_train = [P2_oof, P3_oof]`</p>
+                    <p class="font-mono text-sm mt-2 bg-gray-100 p-2 rounded"><strong>Salida:</strong> `y_meta_train = y_train_full`</p>
+                </div>
+            </div>
+
+            <div id="fase4" class="sub-content-section hidden">
+                <h3 class="text-2xl font-semibold text-gray-800 mb-4">Fase 4: Entrenamiento del Corrector de Errores (N4)</h3>
+                <p class="mb-4">N4 aprende a predecir el error residual de N1. Para hacer esto, necesita el máximo contexto posible: los datos originales y las predicciones de todas las redes anteriores.</p>
+                <div class="card">
+                    <h4 class="text-xl font-semibold text-red-700 mb-3">1. Generación de Datos de Error</h4>
+                    <p class="mb-2">Usamos N1 para predecir sobre los meta-datos y calculamos su error.</p>
+                    <p class="font-mono text-sm bg-gray-100 p-2 rounded">`Error_train = y_train_full - N1.predict(X_meta_train)`</p>
+                </div>
+                <div class="card mt-6">
+                    <h4 class="text-xl font-semibold text-red-700 mb-3">2. Entrenamiento de N4</h4>
+                    <p>Se entrena N4 para que aprenda a predecir ese error.</p>
+                    <p class="font-mono text-sm mt-2 bg-gray-100 p-2 rounded"><strong>Entrada (`X_error_train`):</strong> `[X_train_full, P1_train, P2_oof, P3_oof]`</p>
+                    <p class="font-mono text-sm mt-2 bg-gray-100 p-2 rounded"><strong>Salida (`y_error_train`):</strong> `Error_train`</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="inferencia" class="content-section hidden">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">Proceso de Predicción Final (Inferencia)</h2>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">🔮 Proceso de Predicción Final (Inferencia)</h2>
+            <p class="text-lg text-gray-600 mb-8 max-w-3xl mx-auto text-center">
+                Una vez que todas las redes están entrenadas, hacer una nueva predicción (`X_new`) implica un pipeline de 4 pasos que propaga la información a través de toda la arquitectura.
+            </p>
+            
+            <div class="max-w-2xl mx-auto space-y-6">
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-blue-600 text-white text-xl font-bold rounded-full flex items-center justify-center shadow-lg">1</div>
+                    <div class="flex-shrink-0 w-12 h-12 bg-indigo-600 text-white text-xl font-bold rounded-full flex items-center justify-center shadow-lg">1</div>
+                    <div class="card flex-1">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Paso 1: Redes Base</h3>
+                        <p>Obtener predicciones de las redes base (N2, N3) usando los modelos finales entrenados en todo `X_train_full`.</p>
+                        <p class="font-mono text-sm mt-2">`P2_new = N2.predict(X_new)`</p>
+                        <p class="font-mono text-sm mt-1">`P3_new = N3.predict(X_new)`</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-purple-600 text-white text-xl font-bold rounded-full flex items-center justify-center shadow-lg">2</div>
+                    <div class="card flex-1">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Paso 2: Red de Apilamiento</h3>
+                        <p>Combinar las predicciones base usando la red N1.</p>
+                        <p class="font-mono text-sm mt-2">`X_meta_new = [P2_new, P3_new]`</p>
+                        <p class="font-mono text-sm mt-1">`P1_new = N1.predict(X_meta_new)`</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-red-600 text-white text-xl font-bold rounded-full flex items-center justify-center shadow-lg">3</div>
+                    <div class="card flex-1">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Paso 3: Corrección de Error</h3>
+                        <p>Predecir el error esperado de `P1_new` usando la red N4 y todo el contexto.</p>
+                        <p class="font-mono text-sm mt-2">`X_error_new = [X_new, P1_new, P2_new, P3_new]`</p>
+                        <p class="font-mono text-sm mt-1">`P_corrección = N4.predict(X_error_new)`</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0 w-12 h-12 bg-yellow-400 text-gray-900 text-xl font-bold rounded-full flex items-center justify-center shadow-lg">4</div>
+                    <div class="bg-gray-800 p-5 rounded-lg shadow-lg flex-1 border-2 border-yellow-400 card">
+                        <h3 class="text-xl font-semibold text-white mb-2">Paso 4: Resultado Final</h3>
+                        <p class="text-gray-200">Calcular la predicción final sumando la predicción de N1 y la corrección de N4.</p>
+                        <p class="font-mono text-lg mt-2 text-yellow-300">`P_final = P1_new + P_corrección`</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="retroalimentacion" class="content-section hidden">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">Bucle de Retroalimentación (Iterativo)</h2>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">🔄 Bucle de Retroalimentación (Iterativo)</h2>
+            <p class="text-lg text-gray-600 mb-8 max-w-3xl mx-auto text-center">
+                Esta es la fase más avanzada, que convierte el modelo de estático a dinámico. La información de los errores (reales o predichos por N4) se utiliza para re-entrenar y mejorar N2 y N3, creando un ciclo de mejora continua.
+            </p>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="card border-l-4 border-l-blue-500">
+                    <h3 class="text-xl font-semibold text-blue-700 mb-3">Opción A: Re-ponderación (Boosting)</h3>
+                <div class="card border-l-4 border-l-indigo-500">
+                    <h3 class="text-xl font-semibold text-indigo-700 mb-3">Opción A: Re-ponderación (Boosting)</h3>
+                    <p>Usar la magnitud del error para asignar un *peso* a cada muestra de entrenamiento. Volver a entrenar N2 y N3 con una *loss function* ponderada, dando más importancia a las muestras donde el error fue mayor.</p>
+                </div>
+                <div class="card border-l-4 border-l-blue-500">
+                    <h3 class="text-xl font-semibold text-blue-700 mb-3">Opción B: Generación de Datos</h3>
+                <div class="card border-l-4 border-l-indigo-500">
+                    <h3 class="text-xl font-semibold text-indigo-700 mb-3">Opción B: Generación de Datos</h3>
+                    <p>Usar la predicción de N4 para identificar las muestras más difíciles. Buscar activamente (o solicitar) más datos de entrenamiento similares a estas muestras y agregarlos al conjunto de entrenamiento.</p>
+                </div>
+                <div class="card border-l-4 border-l-blue-500">
+                    <h3 class="text-xl font-semibold text-blue-700 mb-3">Opción C: Ajuste Fino (Fine-Tuning)</h3>
+                <div class="card border-l-4 border-l-indigo-500">
+                    <h3 class="text-xl font-semibold text-indigo-700 mb-3">Opción C: Ajuste Fino (Fine-Tuning)</h3>
+                    <p>Crear un nuevo mini-batch solo con las muestras que tuvieron alto error. Realizar épocas de entrenamiento adicionales (fine-tuning) para N2, N3 y N4 con una tasa de aprendizaje muy baja sobre estos datos.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="consideraciones" class="content-section hidden">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">Consideraciones Clave</h2>
+            <h2 class="text-3xl font-bold text-gray-900 mb-4 text-center">⚠️ Consideraciones Clave</h2>
+            <p class="text-lg text-gray-600 mb-8 max-w-3xl mx-auto text-center">
+                Si bien esta arquitectura es poderosa, introduce una complejidad significativa en el entrenamiento, la gestión y la depuración del modelo.
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="card space-y-4">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Complejidad y Depuración</h3>
+                        <p>Depurar este sistema es difícil. Un error en N2 se propagará a N1 y N4. Se deben evaluar las redes individualmente (N2, N3), luego el ensamblaje (N1), antes de añadir el corrector (N4).</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Gestión del Pipeline (MLOps)</h3>
+                        <p>Se necesita un pipeline de MLOps robusto para gestionar el flujo de datos entre las redes, especialmente el proceso K-Fold para N1 y la recopilación de datos para N4.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3 text-center">Costo Computacional Relativo (Ejemplo)</h3>
+                    <p class="text-sm text-gray-500 text-center mb-4">El costo es elevado, ya que N2 y N3 se entrenan (K+1) veces. Este gráfico muestra un ejemplo hipotético del costo de entrenamiento relativo.</p>
+                    <div class="chart-container">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const mainNavBtns = document.querySelectorAll('.nav-btn:not(.sub-nav-btn)');
+            const contentSections = document.querySelectorAll('.content-section');
+            const subNavBtns = document.querySelectorAll('.sub-nav-btn');
+            const subContentSections = document.querySelectorAll('.sub-content-section');
+
+            function switchTabs(buttons, sections, clickedBtn) {
+                const targetId = clickedBtn.getAttribute('data-target');
+                
+                sections.forEach(section => {
+                    if (section.id === targetId) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                });
+
+                buttons.forEach(btn => {
+                    if (btn === clickedBtn) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            mainNavBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchTabs(mainNavBtns, contentSections, btn);
+                });
+            });
+
+            subNavBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    switchTabs(subNavBtns, subContentSections, btn);
+                });
+            });
+
+            function renderCostChart() {
+                const ctx = document.getElementById('costChart');
+                if (!ctx) return;
+                
+                new Chart(ctx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['N2 (Base, K-Fold)', 'N3 (Base, K-Fold)', 'N1 (Apilamiento)', 'N4 (Corrección)'],
+                        datasets: [{
+                            label: 'Costo de Entrenamiento Relativo',
+                            data: [100, 120, 10, 50],
+                            backgroundColor: [
+                                'rgba(59, 130, 246, 0.6)', 
+                                'rgba(79, 70, 229, 0.6)', 
+                                'rgba(16, 185, 129, 0.6)', 
+                                'rgba(168, 85, 247, 0.6)', 
+                                'rgba(239, 68, 68, 0.6)'  
+                            ],
+                            borderColor: [
+                                'rgba(59, 130, 246, 1)',
+                                'rgba(79, 70, 229, 1)',
+                                'rgba(16, 185, 129, 1)',
+                                'rgba(168, 85, 247, 1)',
+                                'rgba(239, 68, 68, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Unidades de Costo Relativo'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            renderCostChart();
+        });
+    </script>
+</body>
+</html>
